@@ -13,12 +13,18 @@
     "pages:dev": "npx wrangler pages dev .vercel/output/static --compatibility-date=2023-12-18 --compatibility-flag=nodejs_compat"
   },
   "dependencies": {
+    "@emotion/react": "11.11.3",
+    "@emotion/styled": "11.11.0",
+    "@mui/lab": "5.0.0-alpha.158",
+    "@mui/material": "5.15.2",
+    "file-saver": "2.0.5",
     "next": "14.0.4",
     "react": "^18",
     "react-dom": "^18"
   },
   "devDependencies": {
     "@cloudflare/next-on-pages": "1.8.2",
+    "@types/file-saver": "2.0.7",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
@@ -27,7 +33,7 @@
     "eslint-config-next": "14.0.4",
     "eslint-plugin-next-on-pages": "1.8.2",
     "postcss": "^8",
-    "tailwindcss": "^3.3.0",
+    "prettier": "3.1.1",
     "typescript": "^5",
     "vercel": "33.0.1"
   }
