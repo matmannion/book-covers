@@ -23,6 +23,7 @@ export default function BookSearchForm() {
           fullWidth
           placeholder="e.g. The Lord of the Rings"
           minRows={4}
+          maxRows={49}
           sx={{ mb: 1 }}
           error={!!errorMessage}
           helperText={errorMessage}
@@ -123,6 +124,7 @@ function BookCoversSvg({ books }: { books: Book[] }) {
           viewBox="0 0 1654 2522"
           version="1.1"
           xmlns="http://www.w3.org/2000/svg"
+          xmlnsXlink="http://www.w3.org/1999/xlink"
           ref={svgEl}
         >
           {books.map(({ coverImage }, i) => {
@@ -132,7 +134,7 @@ function BookCoversSvg({ books }: { books: Book[] }) {
             return (
               <image
                 key={i}
-                href={coverImage}
+                xlinkHref={coverImage}
                 width={210}
                 height={340}
                 x={colPos * (210 + 30)}

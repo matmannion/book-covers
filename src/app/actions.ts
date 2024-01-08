@@ -26,6 +26,10 @@ export async function getBooks(
     return { message: 'Please enter some book titles to generate stickers for' }
   }
 
+  if (queries.length > 49) {
+    return { message: '49 per page please' }
+  }
+
   const results: (BookDetailsResponse | BookDetailsError)[] = []
   for (const query of queries) {
     results.push(await getBookDetails(query))
@@ -43,7 +47,7 @@ export async function getBooks(
 
 type BookSearchResponse = {
   totalItems: number
-  items: {
+  items?: {
     kind: string
     selfLink: string
     volumeInfo: {
@@ -76,7 +80,7 @@ async function getBookDetails(query: string): Promise<BookDetailsResponse | Book
   url.searchParams.set('q', query)
   url.searchParams.set('langRestrict', 'en')
   url.searchParams.set('printType', 'books')
-  url.searchParams.set('key', 'AIzaSyDAGpAkQ7Z93zBum2J1AHa-cZ7X4kt0K3s')
+  url.searchParams.set('key', '---ELIDED---')
 
   const res = await fetch(url)
   if (!res.ok) {
@@ -90,7 +94,9 @@ async function getBookDetails(query: string): Promise<BookDetailsResponse | Book
   const searchResponse = (await res.json()) as BookSearchResponse
 
   // Find the first item with images
-  const work = searchResponse.items.find(w => w.kind === 'books#volume' && w.volumeInfo.imageLinks)
+  const volumes = searchResponse.items?.filter(w => w.kind === 'books#volume' && w.volumeInfo.imageLinks)
+  const work = volumes?.find(w => query.toLowerCase().includes(w.volumeInfo.title.toLowerCase())) ?? volumes?.at(0)
+
   if (!work) {
     return {
       error: `No results found for ${query}`,
@@ -98,7 +104,7 @@ async function getBookDetails(query: string): Promise<BookDetailsResponse | Book
   }
 
   const volumeURL = new URL(work.selfLink)
-  volumeURL.searchParams.set('key', 'AIzaSyDAGpAkQ7Z93zBum2J1AHa-cZ7X4kt0K3s')
+  volumeURL.searchParams.set('key', '---ELIDED---')
 
   const volumeRes = await fetch(volumeURL)
   if (!volumeRes.ok) {
@@ -111,15 +117,15 @@ async function getBookDetails(query: string): Promise<BookDetailsResponse | Book
     }
   }
 
-  const volumeResponse = (await volumeRes.json()) as BookSearchResponse['items'][number]
+  const volumeResponse = (await volumeRes.json()) as Required<BookSearchResponse>['items'][number]
 
   const imageUrl =
+    volumeResponse.volumeInfo.imageLinks?.thumbnail ??
+    volumeResponse.volumeInfo.imageLinks?.smallThumbnail ??
     volumeResponse.volumeInfo.imageLinks?.medium ??
     volumeResponse.volumeInfo.imageLinks?.small ??
-    volumeResponse.volumeInfo.imageLinks?.thumbnail ??
     volumeResponse.volumeInfo.imageLinks?.large ??
-    volumeResponse.volumeInfo.imageLinks?.extraLarge ??
-    volumeResponse.volumeInfo.imageLinks?.smallThumbnail
+    volumeResponse.volumeInfo.imageLinks?.extraLarge
 
   if (!imageUrl) {
     return {
@@ -151,23 +157,3 @@ async function getBookDetails(query: string): Promise<BookDetailsResponse | Book
     },
   }
 }
-
-/*
-
-async function getSingleCoverImage(isbn: string): Promise<string | undefined> {
-  const response = await fetch(`https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg`)
-
-  if (!response.ok) {
-    return undefined
-  }
-
-  const buffer = await response.arrayBuffer()
-  if (buffer.byteLength === 43) {
-    // 1x1 gif
-    return undefined
-  }
-
-  return
-}
-
- */
